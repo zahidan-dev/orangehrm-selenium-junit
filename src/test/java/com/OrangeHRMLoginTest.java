@@ -1,16 +1,15 @@
 package com.example.orangehrm;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.time.Duration;
 
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -24,7 +23,16 @@ class OrangeHRMLoginTest {
 
     @BeforeEach
     void setUp() {
-        driver = new ChromeDriver();
+
+            ChromeOptions options = new ChromeOptions();
+
+            // Headless Chrome when running in Jenkins
+            if (System.getenv("JENKINS_HOME") != null) {
+                    options.addArguments("--headless=new");
+                    options.addArguments("--window-size=1920,1080");
+            }
+
+            driver = new ChromeDriver(options);
 
         driver.manage().window().maximize();
 
@@ -75,15 +83,14 @@ class OrangeHRMLoginTest {
                 .sendKeys("WrongPassword123");
 
         // CSS Selector
-        driver.findElement(
-                By.cssSelector("button[type='submit']"))
+        wait.until(ExpectedConditions.elementToBeClickable(
+                        By.cssSelector("button[type='submit']")))
                 .click();
 
         // XPath locator
         boolean errorVisible = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//p[contains(@class,'oxd-alert-content-text')]")))
+                                        By.xpath("//p[contains(@class,'oxd-alert-content-text')]")))
                 .isDisplayed();
 
         assertTrue(
